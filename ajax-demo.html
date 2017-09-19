@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<title>ajax-demo</title>
+</head>
+<body>
+	<form action="/login" method="GET" id="loginForm">
+		<lable>
+			用户名:
+			<input name="username" type="text">
+			<span class="errorMessage"></span>
+		</lable>
+	</br>
+	<lable>
+		密码:&nbsp&nbsp&nbsp
+		<input type="password" name="password">
+		<span class="errorMessage"></span>
+	</br>
+	<input type="submit" class="submit">
+</lable>
+</form>
+<style>
+.errorMessage{
+	display:none;
+}
+input.error{
+	border-color:red;
+}
+.error + .errorMessage{
+	color:red;
+	display:inline;
+}
+
+</style>
+<script src="//apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>
+	loginForm.addEventListener('submit',function(e){
+		e.preventDefault()			//取消默认点击提交事件
+		let username = loginForm.username.value
+		let password = loginForm.password.value
+		/*前端验证但是这个方法会被绕过，不建议用*/
+		/*let valid = true
+		if($.trim(username) === ''){
+			$('input[name="username"]').addClass('error').next('.errorMessage').text('用户不能为空')
+			valid = false
+		}
+		if(password === ''){
+			$('input[name=password]').addClass('error').next('.errorMessage').text('密码不能为空')
+			valid = false
+		}
+		if(valid === false){
+			return
+		}*/
+		let request = new XMLHttpRequest()
+		request.onreadystatechange=function(){
+			if(request.readyState === 4){
+				if(request.status >= 400){
+					let {errors} = JSON.parse(request.responseText)
+					for(var key in errors){
+						let value = errors[key]
+						$('input[name=${key}]').addClass('error').next('.errorMessage').text(value)
+					}
+					
+				}else{
+					location.href="/home" //跳转首页
+				}
+				
+			}
+		}
+		request.onload = function(){
+			alert(this.responseText)
+		}
+		request.open('POST',loginForm.action)
+		request.send(`username=${username}&password=${password}`)
+		request.onreadystatechange = function(){
+			if(request.readyState === 4){        //响应下载完了
+				if(request.states >= 400){
+					alert('提交失败')
+				}else{
+					alert('提交成功')
+				}
+			}
+		}
+	})
+	$('input').on('click',function(e){
+		$(this).removeClass('error')
+	})
+</script>
+</body>
